@@ -10,8 +10,12 @@
 ├── db.py
 ├── requirements.txt
 ├── README.md
+├── DEPLOY.md
 ├── Dockerfile
 ├── render.yaml
+├── deploy
+│   ├── nginx.conf
+│   └── timu-review.service
 ├── scripts
 │   ├── init_db.py
 │   ├── import_excel.py
@@ -60,6 +64,8 @@ python app.py
 - 管理页：<http://127.0.0.1:5000/admin>
 - 筛选页：<http://127.0.0.1:5000/review?reviewer_id=reviewer_1>
 
+如果设置了 `ADMIN_PASSWORD`，访问 `/admin` 和 `/export` 时需要先登录管理员账号。
+
 10 个筛选人的入口分别为：
 
 ```text
@@ -78,6 +84,15 @@ python app.py
 - 初始化 10 个筛选人的题目分配
 - 查看整体进度与各筛选人进度
 - 导出筛选结果
+
+服务器部署时请设置：
+
+```text
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=强密码
+SECRET_KEY=随机长字符串
+REVIEW_DB_PATH=/data/timu/review.db
+```
 
 导出接口：
 
@@ -206,6 +221,7 @@ https://你的服务地址/review?reviewer_id=reviewer_2
 
 ## 生产环境注意事项
 
-- 当前管理页没有登录系统，请只把 `/admin` 发给管理员使用。
+- 服务器部署请优先阅读 [DEPLOY.md](DEPLOY.md)。
+- `/admin` 和 `/export` 支持管理员密码保护，公网或内网服务器都应设置 `ADMIN_PASSWORD`。
 - 如果题库敏感，不要将 Excel 或导出的结果提交到 GitHub。
 - SQLite 适合 10 人以内这种轻量协作筛选；如果未来人数很多或需要复杂权限，建议迁移到 PostgreSQL。

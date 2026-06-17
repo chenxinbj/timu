@@ -1,11 +1,23 @@
 from __future__ import annotations
 
+from functools import wraps
 from io import BytesIO
 from math import ceil
 import os
+import secrets
 
 import pandas as pd
-from flask import Flask, flash, jsonify, redirect, render_template, request, send_file, url_for
+from flask import (
+    Flask,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    session,
+    url_for,
+)
 
 from db import (
     DB_PATH,
@@ -30,6 +42,8 @@ VALID_STATUSES = {"pending", "keep", "delete"}
 REVIEW_ACTIONS = {"keep", "delete"}
 PAGE_SIZE_DEFAULT = 50
 PAGE_SIZE_MAX = 100
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 
 def parse_int(value: str | None, default: int, minimum: int, maximum: int | None = None) -> int:
@@ -43,12 +57,60 @@ def parse_int(value: str | None, default: int, minimum: int, maximum: int | None
     return number
 
 
+def admin_auth_enabled() -> bool:
+    return bool(ADMIN_PASSWORD)
+
+
+def is_admin_logged_in() -> bool:
+    if not admin_auth_enabled():
+        return True
+    return session.get("is_admin") is True
+
+
+def admin_required(view_func):
+    @wraps(view_func)
+    def wrapper(*args, **kwargs):
+        if is_admin_logged_in():
+            return view_func(*args, **kwargs)
+        next_url = request.full_path if request.query_string else request.path
+        return redirect(url_for("login", next=next_url))
+
+    return wrapper
+
+
 @app.route("/")
 def index():
     return redirect(url_for("admin"))
 
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if not admin_auth_enabled():
+        return redirect(url_for("admin"))
+
+    next_url = request.args.get("next") or url_for("admin")
+    if request.method == "POST":
+        username = request.form.get("username", "")
+        password = request.form.get("password", "")
+        if (
+            secrets.compare_digest(username, ADMIN_USERNAME)
+            and secrets.compare_digest(password, ADMIN_PASSWORD)
+        ):
+            session["is_admin"] = True
+            return redirect(next_url)
+        flash("用户名或密码不正确。", "error")
+
+    return render_template("login.html", next_url=next_url, username=ADMIN_USERNAME)
+
+
+@app.post("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+
 @app.route("/admin")
+@admin_required
 def admin():
     excel_file = None
     excel_error = None
@@ -73,10 +135,12 @@ def admin():
         excel_error=excel_error,
         overall=overall,
         assignments=assignments,
+        auth_enabled=admin_auth_enabled(),
     )
 
 
 @app.post("/admin/init-db")
+@admin_required
 def admin_init_db():
     init_db()
     flash("数据库初始化完成。", "success")
@@ -84,6 +148,7 @@ def admin_init_db():
 
 
 @app.post("/admin/import")
+@admin_required
 def admin_import():
     try:
         count = import_questions_from_excel()
@@ -95,6 +160,7 @@ def admin_import():
 
 
 @app.post("/admin/upload-import")
+@admin_required
 def admin_upload_import():
     upload = request.files.get("excel_file")
     if upload is None or not upload.filename:
@@ -114,6 +180,7 @@ def admin_upload_import():
 
 
 @app.post("/admin/init-assignments")
+@admin_required
 def admin_init_assignments():
     count = init_assignments()
     flash(f"分配初始化完成，共 {count} 个筛选人。", "success")
@@ -303,6 +370,7 @@ def api_progress():
 
 
 @app.get("/export")
+@admin_required
 def export():
     init_db()
     with connect() as conn:

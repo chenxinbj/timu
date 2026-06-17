@@ -1,0 +1,16 @@
+[Unit]
+Description=Timu Review Flask App
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/timu-review
+EnvironmentFile=/etc/timu-review.env
+ExecStart=/opt/timu-review/.venv/bin/gunicorn --bind 127.0.0.1:8000 --workers 2 --threads 4 --timeout 120 app:app
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

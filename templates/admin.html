@@ -20,8 +20,23 @@
             <span class="text-danger">{{ excel_error }}</span>
           {% endif %}
         </p>
+        <p>
+          管理员保护：
+          {% if auth_enabled %}
+            已启用
+          {% else %}
+            <span class="text-danger">未启用，请在服务器设置 ADMIN_PASSWORD</span>
+          {% endif %}
+        </p>
       </div>
-      <a class="button secondary" href="{{ url_for('review') }}?reviewer_id=reviewer_1">进入 reviewer_1</a>
+      <div class="header-actions">
+        <a class="button secondary" href="{{ url_for('review') }}?reviewer_id=reviewer_1">进入 reviewer_1</a>
+        {% if auth_enabled %}
+          <form method="post" action="{{ url_for('logout') }}">
+            <button type="submit" class="secondary-button">退出</button>
+          </form>
+        {% endif %}
+      </div>
     </header>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
