@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+review.db
+reviewed_tiku.xlsx
+*.db-shm
+*.db-wal
+tiku.xlsx
+timu.xlsx
+*.xlsx
+!requirements.txt

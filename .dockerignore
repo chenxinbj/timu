@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+review.db
+*.db
+*.db-shm
+*.db-wal
+*.xlsx
+reviewed_tiku.xlsx

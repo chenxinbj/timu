@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: timu-review
+    env: docker
+    plan: starter
+    autoDeploy: true
+    disk:
+      name: review-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: REVIEW_DB_PATH
+        value: /var/data/review.db
+      - key: FLASK_DEBUG
+        value: "0"
+      - key: SECRET_KEY
+        generateValue: true

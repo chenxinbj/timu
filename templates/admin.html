@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>题库筛选管理</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <div>
+        <h1>题库筛选管理</h1>
+        <p>数据库：{{ db_path }}{% if db_exists %}（已存在）{% else %}（未初始化）{% endif %}</p>
+        <p>
+          题库文件：
+          {% if excel_file %}
+            {{ excel_file }}
+          {% else %}
+            <span class="text-danger">{{ excel_error }}</span>
+          {% endif %}
+        </p>
+      </div>
+      <a class="button secondary" href="{{ url_for('review') }}?reviewer_id=reviewer_1">进入 reviewer_1</a>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <section class="messages">
+          {% for category, message in messages %}
+            <div class="message {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </section>
+      {% endif %}
+    {% endwith %}
+
+    <section class="toolbar">
+      <form method="post" action="{{ url_for('admin_init_db') }}">
+        <button type="submit">初始化数据库</button>
+      </form>
+      <form method="post" action="{{ url_for('admin_import') }}">
+        <button type="submit">导入题库</button>
+      </form>
+      <form method="post" action="{{ url_for('admin_upload_import') }}" enctype="multipart/form-data" class="upload-form">
+        <input type="file" name="excel_file" accept=".xlsx,.xls" required>
+        <button type="submit">上传 Excel 并导入</button>
+      </form>
+      <form method="post" action="{{ url_for('admin_init_assignments') }}">
+        <button type="submit">初始化 10 人分配</button>
+      </form>
+      <a class="button" href="{{ url_for('export') }}">导出结果</a>
+    </section>
+
+    <section class="summary-grid">
+      <div class="metric">
+        <span>总题数</span>
+        <strong>{{ overall.total }}</strong>
+      </div>
+      <div class="metric">
+        <span>未处理</span>
+        <strong>{{ overall.pending }}</strong>
+      </div>
+      <div class="metric">
+        <span>保留</span>
+        <strong>{{ overall.keep }}</strong>
+      </div>
+      <div class="metric">
+        <span>删除</span>
+        <strong>{{ overall.delete }}</strong>
+      </div>
+    </section>
+
+    <section>
+      <h2>筛选人进度</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>筛选人</th>
+              <th>区间</th>
+              <th>已处理</th>
+              <th>保留</th>
+              <th>删除</th>
+              <th>进度</th>
+              <th>入口</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in assignments %}
+              <tr>
+                <td>{{ item.reviewer_id }}</td>
+                <td>{{ item.start_question_id }}–{{ item.end_question_id }}</td>
+                <td>{{ item.reviewed }} / {{ item.total }}</td>
+                <td>{{ item.keep }}</td>
+                <td>{{ item.delete }}</td>
+                <td>
+                  {% if item.total %}
+                    {{ "%.1f"|format(item.reviewed * 100 / item.total) }}%
+                  {% else %}
+                    0%
+                  {% endif %}
+                </td>
+                <td><a href="{{ url_for('review') }}?reviewer_id={{ item.reviewer_id }}">打开</a></td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="7" class="empty">暂无分配数据</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

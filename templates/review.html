@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>题库筛选</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page review-page" data-reviewer-id="{{ reviewer_id }}">
+    <header class="page-header">
+      <div>
+        <h1>题库筛选</h1>
+        <p>
+          当前筛选人：
+          <strong id="reviewerLabel">{{ reviewer_id or "未指定" }}</strong>
+          <span id="rangeLabel"></span>
+        </p>
+      </div>
+      <a class="button secondary" href="{{ url_for('admin') }}">管理页</a>
+    </header>
+
+    <section class="review-controls">
+      <label>
+        筛选状态
+        <select id="statusFilter">
+          <option value="all">全部</option>
+          <option value="pending">未处理</option>
+          <option value="keep">已保留</option>
+          <option value="delete">已删除</option>
+        </select>
+      </label>
+      <label>
+        每页
+        <select id="pageSize">
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="20">20</option>
+        </select>
+      </label>
+      <div class="progress-box" id="progressText">已处理 0 / 共 0</div>
+    </section>
+
+    <section id="errorBox" class="message error hidden"></section>
+
+    <section id="questions" class="questions"></section>
+
+    <nav class="pagination">
+      <button id="prevPage" type="button">上一页</button>
+      <span id="pageInfo">第 1 / 1 页</span>
+      <button id="nextPage" type="button">下一页</button>
+    </nav>
+  </main>
+
+  <script src="{{ url_for('static', filename='review.js') }}"></script>
+</body>
+</html>
