@@ -42,6 +42,8 @@ function renderQuestion(question) {
   const card = document.createElement("article");
   card.className = "question-card";
   card.dataset.questionId = question.question_id;
+  const keepActive = question.review_status === "keep" ? " active" : "";
+  const deleteActive = question.review_status === "delete" ? " active" : "";
   card.innerHTML = `
     <div class="question-head">
       <div>
@@ -58,8 +60,8 @@ function renderQuestion(question) {
     </div>
     <div class="question-content">${escapeHtml(question.content)}</div>
     <div class="question-actions">
-      <button class="keep-button" type="button" data-action="keep">保留</button>
-      <button class="delete-button" type="button" data-action="delete">删除</button>
+      <button class="keep-button${keepActive}" type="button" data-action="keep">保留</button>
+      <button class="delete-button${deleteActive}" type="button" data-action="delete">删除</button>
     </div>
   `;
   return card;
@@ -148,13 +150,7 @@ async function submitReview(card, action) {
       showError(data.error || "保存失败");
       return;
     }
-    const statusEl = card.querySelector(".status");
-    statusEl.textContent = data.review_status_label;
-    statusEl.className = `status ${statusClass[data.review_status] || ""}`;
-    await refreshProgress();
-    if (statusFilter.value !== "all" && statusFilter.value !== data.review_status) {
-      card.remove();
-    }
+    await loadQuestions();
   } finally {
     buttons.forEach((button) => {
       button.disabled = false;

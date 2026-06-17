@@ -291,6 +291,11 @@ tr:last-child td {
   background: var(--danger);
 }
 
+.question-actions button.active {
+  box-shadow: 0 0 0 3px rgba(23, 105, 170, 0.18);
+  font-weight: 700;
+}
+
 .pagination {
   display: flex;
   align-items: center;
