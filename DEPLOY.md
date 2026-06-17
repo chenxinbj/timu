@@ -102,6 +102,7 @@ ADMIN_USERNAME=admin
 ADMIN_PASSWORD=设置一个强密码
 REVIEW_DB_PATH=/data/timu/review.db
 FLASK_DEBUG=0
+ENABLE_SETUP_ACTIONS=0
 ```
 
 生成 `SECRET_KEY`：
@@ -229,6 +230,7 @@ sudo systemctl start timu-review
 
 - 公网或内网部署都必须设置 `ADMIN_PASSWORD`。
 - `/admin` 和 `/export` 已受管理员登录保护。
+- 已导入好题库并上线后，建议设置 `ENABLE_SETUP_ACTIONS=0`，这样管理页会隐藏并禁用初始化数据库、导入题库、上传 Excel、初始化分配等危险操作。
 - 筛选链接仍通过 `reviewer_id` 区分人员，请不要把不属于某人的链接发给他人。
 - SQLite 适合当前 10 人轻量协作；若未来人数明显增加，建议迁移到 PostgreSQL。
 - 不要把 `review.db`、Excel 题库、导出结果提交到公开仓库。

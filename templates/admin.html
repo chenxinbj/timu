@@ -50,19 +50,21 @@
     {% endwith %}
 
     <section class="toolbar">
-      <form method="post" action="{{ url_for('admin_init_db') }}">
-        <button type="submit">初始化数据库</button>
-      </form>
-      <form method="post" action="{{ url_for('admin_import') }}">
-        <button type="submit">导入题库</button>
-      </form>
-      <form method="post" action="{{ url_for('admin_upload_import') }}" enctype="multipart/form-data" class="upload-form">
-        <input type="file" name="excel_file" accept=".xlsx,.xls" required>
-        <button type="submit">上传 Excel 并导入</button>
-      </form>
-      <form method="post" action="{{ url_for('admin_init_assignments') }}">
-        <button type="submit">初始化 10 人分配</button>
-      </form>
+      {% if setup_actions_enabled %}
+        <form method="post" action="{{ url_for('admin_init_db') }}">
+          <button type="submit">初始化数据库</button>
+        </form>
+        <form method="post" action="{{ url_for('admin_import') }}">
+          <button type="submit">导入题库</button>
+        </form>
+        <form method="post" action="{{ url_for('admin_upload_import') }}" enctype="multipart/form-data" class="upload-form">
+          <input type="file" name="excel_file" accept=".xlsx,.xls" required>
+          <button type="submit">上传 Excel 并导入</button>
+        </form>
+        <form method="post" action="{{ url_for('admin_init_assignments') }}">
+          <button type="submit">初始化 10 人分配</button>
+        </form>
+      {% endif %}
       <a class="button" href="{{ url_for('export') }}">导出结果</a>
     </section>
 

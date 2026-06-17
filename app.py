@@ -44,6 +44,7 @@ PAGE_SIZE_DEFAULT = 50
 PAGE_SIZE_MAX = 100
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
+ENABLE_SETUP_ACTIONS = os.environ.get("ENABLE_SETUP_ACTIONS", "1") == "1"
 
 
 def parse_int(value: str | None, default: int, minimum: int, maximum: int | None = None) -> int:
@@ -74,6 +75,17 @@ def admin_required(view_func):
             return view_func(*args, **kwargs)
         next_url = request.full_path if request.query_string else request.path
         return redirect(url_for("login", next=next_url))
+
+    return wrapper
+
+
+def setup_actions_required(view_func):
+    @wraps(view_func)
+    def wrapper(*args, **kwargs):
+        if not ENABLE_SETUP_ACTIONS:
+            flash("服务器已隐藏并禁用初始化和导入功能。", "error")
+            return redirect(url_for("admin"))
+        return view_func(*args, **kwargs)
 
     return wrapper
 
@@ -136,11 +148,13 @@ def admin():
         overall=overall,
         assignments=assignments,
         auth_enabled=admin_auth_enabled(),
+        setup_actions_enabled=ENABLE_SETUP_ACTIONS,
     )
 
 
 @app.post("/admin/init-db")
 @admin_required
+@setup_actions_required
 def admin_init_db():
     init_db()
     flash("数据库初始化完成。", "success")
@@ -149,6 +163,7 @@ def admin_init_db():
 
 @app.post("/admin/import")
 @admin_required
+@setup_actions_required
 def admin_import():
     try:
         count = import_questions_from_excel()
@@ -161,6 +176,7 @@ def admin_import():
 
 @app.post("/admin/upload-import")
 @admin_required
+@setup_actions_required
 def admin_upload_import():
     upload = request.files.get("excel_file")
     if upload is None or not upload.filename:
@@ -181,6 +197,7 @@ def admin_upload_import():
 
 @app.post("/admin/init-assignments")
 @admin_required
+@setup_actions_required
 def admin_init_assignments():
     count = init_assignments()
     flash(f"分配初始化完成，共 {count} 个筛选人。", "success")

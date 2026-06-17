@@ -92,6 +92,7 @@ ADMIN_USERNAME=admin
 ADMIN_PASSWORD=强密码
 SECRET_KEY=随机长字符串
 REVIEW_DB_PATH=/data/timu/review.db
+ENABLE_SETUP_ACTIONS=0
 ```
 
 导出接口：
